@@ -9,7 +9,7 @@ GEOMETRY=()
 
 show_help()
 {
-    echo "usage: $0 -i id -s size -o output_file"
+    echo "Usage: $0 [-i id | -r number] -s size"
     echo
     echo "Possible sizes are:"
     size=0
@@ -20,16 +20,19 @@ show_help()
     done
 }
 
-while getopts "hi:s:o:" opt; do
+random=0
+ids=()
+
+while getopts "hi:r:s:" opt; do
     case "$opt" in
     h)  show_help
         exit 0
         ;;
-    i)  id=$OPTARG
+    i)  ids[0]=$OPTARG
+        ;;
+    r)  random=$OPTARG
         ;;
     s)  size=$OPTARG
-        ;;
-    o)  outfile=$OPTARG
         ;;
     esac
 done
@@ -38,11 +41,17 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
-if [[ ! "$id" ]] || [[ ! "$size" ]] || [[ ! "$outfile" ]] || [[ ! "${IMAGES[$size]}" ]]; then
+if (( $random > 0 )); then
+    ids=(`python generate_random_id.py 20 $random`)
+fi
+
+if [[ ! "${ids[0]}" ]] || [[ ! "$size" ]] || [[ ! "${IMAGES[$size]}" ]]; then
     show_help
     exit 1
 fi
 
-qrencode ${QROPTS[$size]} -t PNG -o $TEMPPNG $BASEURL$id
-composite -geometry ${GEOMETRY[$size]} $TEMPPNG images/${IMAGES[$size]} $outfile
-rm -f $TEMPPNG
+for id in ${ids[*]}; do
+    qrencode ${QROPTS[$size]} -t PNG -o $TEMPPNG $BASEURL$id
+    composite -geometry ${GEOMETRY[$size]} $TEMPPNG images/${IMAGES[$size]} $id.png
+    rm -f $TEMPPNG
+done
