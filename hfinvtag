@@ -1,0 +1,48 @@
+#!/bin/bash
+
+BASEURL="http://inventory.hackf.org/"
+TEMPPNG=".hfinvtag-qr-tmp.png"
+
+IMAGES=()
+QROPTS=()
+GEOMETRY=()
+
+show_help()
+{
+    echo "usage: $0 -i id -s size -o output_file"
+    echo
+    echo "Possible sizes are:"
+    size=0
+    for psize in ${IMAGES[*]}; do
+        echo -en "\t$size\t"
+        identify images/$psize | cut -f3 -d' '
+        size=$(( $size + 1 ))
+    done
+}
+
+while getopts "hi:s:o:" opt; do
+    case "$opt" in
+    h)  show_help
+        exit 0
+        ;;
+    i)  id=$OPTARG
+        ;;
+    s)  size=$OPTARG
+        ;;
+    o)  outfile=$OPTARG
+        ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+[ "$1" = "--" ] && shift
+
+if [[ ! "$id" ]] || [[ ! "$size" ]] || [[ ! "$outfile" ]] || [[ ! "${IMAGES[$size]}" ]]; then
+    show_help
+    exit 1
+fi
+
+qrencode ${QROPTS[$size]} -t PNG -o $TEMPPNG $BASEURL$id
+composite -geometry ${GEOMETRY[$size]} $TEMPPNG images/${IMAGES[$size]} $outfile
+rm -f $TEMPPNG
