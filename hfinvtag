@@ -1,11 +1,11 @@
 #!/bin/bash
 
-BASEURL="http://inventory.hackf.org/"
+BASEURL="http://inventory.hackf.org/doku.php?id="
 TEMPPNG=".hfinvtag-qr-tmp.png"
 
-IMAGES=()
-QROPTS=()
-GEOMETRY=()
+IMAGES=("hfinv_123x250.png")
+QROPTS=("-s 3 -m 4")
+GEOMETRY=("+0+86")
 
 show_help()
 {
