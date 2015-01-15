@@ -42,7 +42,7 @@ shift $((OPTIND-1))
 [ "$1" = "--" ] && shift
 
 if (( $random > 0 )); then
-    ids=(`python generate_random_id.py 20 $random`)
+    ids=($(python generate_random_id.py 20 $random))
 fi
 
 if [[ ! "${ids[0]}" ]] || [[ ! "$size" ]] || [[ ! "${IMAGES[$size]}" ]]; then
